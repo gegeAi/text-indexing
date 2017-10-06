@@ -1,1 +1,5 @@
 /latimes
+Untitle*.ipynb
+*.ipynb
+.idea/*
+pyscripts/__pycache__
