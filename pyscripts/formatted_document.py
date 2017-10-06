@@ -48,7 +48,7 @@ class FormattedDocument(object):
         return :
             - a list of elements, where an element represents an article and :
               element : dictionnary (id, title, date, length, text) :
-                - id : string, the id of an article
+                - id : integer, the id of an article
                 - title : string, the title of the article
                 - date : string, when the article is written
                 - length : integer, how many words are in the article
@@ -61,7 +61,7 @@ class FormattedDocument(object):
             element = {}
 
             # parts that are necessary
-            element['id'] = doc.find(".//DOCID").text + '-' + doc.find(".//DOCNO").text
+            element['id'] = int(doc.find(".//DOCID").text)
             element['text'] = []
             for paragr in doc.findall(".//TEXT//P"):
                 element['text'].append(self.__tokenizer.word_tokenize(paragr.text))
