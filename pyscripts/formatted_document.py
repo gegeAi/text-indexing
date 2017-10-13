@@ -2,24 +2,22 @@ import json
 import re
 import nltk
 
-nltk.download('punkt')
-
 
 class FormattedDocument(object):
     """
-    Class made to handle specific xml parsing of a document and converting it to a json file tokenized,
+    Class made to handle specific xml parsing of a document and converting it to a json file tokenized, 
     which is easier to interpret
     Initialize :
         - choose one of :
-            - xml_root_doc : initialize from an xml.etree.ElementTree of architecture
+            - xml_root_doc : initialize from an xml.etree.ElementTree of architecture 
               .//RAC//DOC//{DOCID, HEADLINE//P, DATE//P, LENGTH//P, TEXT//P}
-            - json_doc : initialize from a json string of shape {'document': self.matches}
-        - tokenizer : object which must implements a method "word_tokenize", which is then used to
+            - json_doc : initialize from a json string of shape {'document': self.matches} 
+        - tokenizer : object which must implements a method "word_tokenize", which is then used to 
           tokenize the title and text. Default is nltk
 
     Attributes :
         - matches : a list of elements, where an element represents an article and :
-              element : dictionnary (id, title, date, length, text) :
+              element : dictionary (id, title, date, length, text) :
                 - id : integer, the id of an article
                 - title : list of string, the title of the article tokenized
                 - date : string, when the article is written
@@ -29,6 +27,8 @@ class FormattedDocument(object):
     """
 
     def __init__(self, xml_root_doc=None, json_doc=None, tokenizer=nltk):
+        if tokenizer == nltk:
+            nltk.download('punkt')
 
         self.__tokenizer = tokenizer
         if xml_root_doc is not None:
@@ -47,7 +47,7 @@ class FormattedDocument(object):
             - xml_root_doc : xml.etree.ElementTree, root of an xml document
         return :
             - a list of elements, where an element represents an article and :
-              element : dictionnary (id, title, date, length, text) :
+              element : dictionary (id, title, date, length, text) :
                 - id : integer, the id of an article
                 - title : string, the title of the article
                 - date : string, when the article is written
@@ -63,8 +63,8 @@ class FormattedDocument(object):
             # parts that are necessary
             element['id'] = int(doc.find(".//DOCID").text)
             element['text'] = []
-            for paragr in doc.findall(".//TEXT//P"):
-                element['text'].append(self.__tokenizer.word_tokenize(paragr.text))
+            for paragraph in doc.findall(".//TEXT//P"):
+                element['text'].append(self.__tokenizer.word_tokenize(paragraph.text))
 
             # parts that are bonuses
             title = doc.find(".//HEADLINE//P")

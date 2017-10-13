@@ -67,7 +67,7 @@ class InvertedFile(object):
                   - text : 2D list of string, where each list is paragraph, represented by a list of tokens
         :return:None
         """
-        paragraph_tokens = document["text"]
+        paragraph_tokens = document["text"].copy()
         paragraph_tokens.append(document["title"])
         seen_list = []
         for paragraph in paragraph_tokens:
@@ -106,6 +106,14 @@ class InvertedFile(object):
             n_list = tps + n_list
         output = bytearray(n_list)
         return output
+        
+    @property
+    def map(self):
+        return self.__map
+    
+    @map.setter
+    def map(self, value):
+        pass
 
     @classmethod
     def __encode_key(cls, key):
