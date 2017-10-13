@@ -1,4 +1,5 @@
 from sortedcontainers import SortedDict as sd
+from sortedcontainers import SortedList
 
 
 class OutOfBoundError(Exception):
@@ -76,14 +77,16 @@ class InvertedFile(object):
                     seen_list.append(token)
                     score = self.__score_function(token, document)
                     if token not in self.__map:
-                        self.__map[token] = []
+                        self.__map[token] = SortedList()
                     self.__map[token].append((document['id'], score))
 
     def save(self, filename):
         """
         TODO : Complete this method
         """
-        output = self.__encode_posting_list(self.__map.keys()[0], self.__map[self.__map.keys()[0]])
+        output = bytearray()
+        for (key, value) in self.__map.iteritems():
+            output += self.__encode_posting_list(key, value)
         with open(filename, 'wb+')as f:
             f.write(output)
 
@@ -181,36 +184,78 @@ class InvertedFile(object):
         """
         return cls.__encode_key(key) + cls.__encode_list(map_content)
 
+    @classmethod
+    def __read_key(cls, file):
+        """
+
+        :param file:
+        :return:
+        """
+        # get key
+        bin_key_len = file.read(cls.key_len_len)
+        if len(bin_key_len) != cls.key_len_len:
+            return None, None
+        key_len = cls.__decode_key_len(bin_key_len)
+
+        bin_key = file.read(key_len)
+        key = cls.__decode_key(bin_key)
+
+        # get list len
+        bin_list_len = file.read(cls.list_len_len)
+        list_len = cls.__decode_list_len(bin_list_len)
+
+        return key, list_len
+
+    @classmethod
+    def __read_key_and_posting_list(cls, file):
+        """
+
+        :param file:
+        :return:
+        """
+        key, list_len = cls.__read_key(file)
+        posting_list = cls.__decode_list(file.read(list_len))
+        return key, posting_list
+
+    @classmethod
+    def decode_only_keys(cls, filename):
+        """
+
+        :param filename:
+        :return:
+        """
+        output = []
+        with open(filename, 'rb') as f:
+
+            while True:
+                position = f.tell()
+                key, list_len = cls.__read_key(f)
+                if key is None:
+                    break
+                output.append((key, position))
+                f.seek(list_len, 1)
+
+        return output
+
     def decode_posting_lists(self, keys, filename):
         """
 
         :param keys:
-        :param bin_posting_list_list:
+        :param filename:
         :return:
         """
         with open(filename, 'rb') as f:
 
             while True:
-                # get key
-                bin_key_len = f.read(self.key_len_len)
-                if len(bin_key_len) != self.key_len_len:
+                key, list_len = self.__read_key(f)
+                if key is None:
                     break
-                key_len = self.__decode_key_len(bin_key_len)
-
-                bin_key = f.read(key_len)
-                key = self.__decode_key(bin_key)
-
-                # get list len
-                bin_list_len = f.read(self.list_len_len)
-                list_len = self.__decode_list_len(bin_list_len)
-
                 # if key is one of the wanted keys
-                if key in keys:
+                if keys is None or key in keys:
                     posting_list = self.__decode_list(f.read(list_len))
                     self.__map[key] = posting_list
                 else:
                     f.seek(list_len, 1)
-
 
     @classmethod
     def __decode_number(cls, bin_number):
@@ -311,3 +356,38 @@ class InvertedFile(object):
         :return:
         """
         return cls.__decode_number(bin_doc_id)
+
+    @classmethod
+    def merge_inverted_files(cls, filename_merge, filename_if1, filename_if2):
+        """
+
+        :param filename_merge:
+        :param filename_if1:
+        :param filename_if2:
+        :return:
+        """
+
+        with open(filename_merge, 'wb+') as output:
+            with open(filename_if1, 'rb') as if1:
+                with open(filename_if2, 'rb') as if2:
+                    key_if1, pl_if1 = cls.__read_key_and_posting_list(if1)
+                    key_if2, pl_if2 = cls.__read_key_and_posting_list(if2)
+                    while True:
+
+                        if key_if1 is None and key_if2 is None:
+                            break
+                        elif key_if1 is not None and (key_if2 is None or key_if1 < key_if2):
+                            posting_list = pl_if1
+                            key = key_if1
+                            key_if1, pl_if1 = cls.__read_key_and_posting_list(if1)
+                        elif key_if1 is None or key_if1 > key_if2:
+                            posting_list = pl_if2
+                            key = key_if2
+                            key_if2, pl_if2 = cls.__read_key_and_posting_list(if2)
+                        else:
+                            posting_list = pl_if1 + pl_if2
+                            key = key_if1
+                            key_if1, pl_if1 = cls.__read_key_and_posting_list(if1)
+                            key_if2, pl_if2 = cls.__read_key_and_posting_list(if2)
+                        output.write(cls.__encode_posting_list(key, posting_list))
+
