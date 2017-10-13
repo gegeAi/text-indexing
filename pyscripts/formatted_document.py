@@ -1,7 +1,7 @@
 import json
 import re
 import nltk
-import test
+
 
 class FormattedDocument(object):
     """
@@ -14,10 +14,10 @@ class FormattedDocument(object):
             - json_doc : initialize from a json string of shape {'document': self.matches} 
         - tokenizer : object which must implements a method "word_tokenize", which is then used to 
           tokenize the title and text. Default is nltk
-          
+
     Attributes :
         - matches : a list of elements, where an element represents an article and :
-              element : dictionnary (id, title, date, length, text) :
+              element : dictionary (id, title, date, length, text) :
                 - id : integer, the id of an article
                 - title : list of string, the title of the article tokenized
                 - date : string, when the article is written
@@ -29,7 +29,7 @@ class FormattedDocument(object):
     def __init__(self, xml_root_doc=None, json_doc=None, tokenizer=nltk):
         if tokenizer == nltk:
             nltk.download('punkt')
-        
+
         self.__tokenizer = tokenizer
         if xml_root_doc is not None:
             self.matches = self.__format(xml_root_doc)
@@ -37,8 +37,7 @@ class FormattedDocument(object):
             self.matches = json.loads(json_doc)['document']
         else:
             self.matches = []
-        
-        
+
     def __format(self, xml_root_doc):
         """
         convert the xml file into lists and dictionnaries,
@@ -48,41 +47,40 @@ class FormattedDocument(object):
             - xml_root_doc : xml.etree.ElementTree, root of an xml document
         return :
             - a list of elements, where an element represents an article and :
-              element : dictionnary (id, title, date, length, text) :
-                - id : string, the id of an article
+              element : dictionary (id, title, date, length, text) :
+                - id : integer, the id of an article
                 - title : string, the title of the article
                 - date : string, when the article is written
                 - length : integer, how many words are in the article
                 - text : list, a list of string, where each string is a paragraph
         """
         output = []
-        
+
         for doc in xml_root_doc.findall('.//DOC'):
-            # TODO : convert dictionnary into object 
+            # TODO : convert dictionnary into object
             element = {}
-            
+
             # parts that are necessary
-            element['id'] = doc.find(".//DOCID").text + '-' + doc.find(".//DOCNO").text
+            element['id'] = int(doc.find(".//DOCID").text)
             element['text'] = []
             for paragraph in doc.findall(".//TEXT//P"):
                 element['text'].append(self.__tokenizer.word_tokenize(paragraph.text))
-            
+
             # parts that are bonuses
             title = doc.find(".//HEADLINE//P")
             element['title'] = self.__tokenizer.word_tokenize(title.text if title is not None else '')
-            
+
             date = doc.find(".//DATE//P")
             element['date'] = date.text if date is not None else None
-            
+
             length = doc.find(".//LENGTH//P")
             length = re.findall(r'\d+', length.text if length is not None else '0')
             element['length'] = int(length[0] if len(length) > 0 else 0)
-            
+
             output.append(element)
-            
+
         return output
-        
-        
+
     def to_json(self):
         """
         Convert the object into a json string
@@ -91,8 +89,7 @@ class FormattedDocument(object):
             - a string, which is of shape {'document': self.matches}
         """
         return json.dumps({'document': self.matches})
-        
-        
+
     @staticmethod
     def sum(doc1, doc2):
         """
@@ -100,7 +97,7 @@ class FormattedDocument(object):
         parameters:
             - doc1, doc2: two FormattedDocument to be concatenated
         return :
-            - a FormattedDocument, where its attribute self.matches is the concatenation 
+            - a FormattedDocument, where its attribute self.matches is the concatenation
               of the two first attributes self.matches
         """
         doc3 = FormattedDocument()
