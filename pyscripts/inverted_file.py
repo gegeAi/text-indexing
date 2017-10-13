@@ -64,7 +64,7 @@ class InvertedFile(object):
                   - text : 2D list of string, where each list is paragraph, represented by a list of tokens
         return : None
         """
-        paragraph_tokens = document["text"]
+        paragraph_tokens = document["text"].copy()
         paragraph_tokens.append(document["title"])
         seen_list = []
         for paragraph in paragraph_tokens:
