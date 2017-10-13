@@ -81,6 +81,9 @@ class InvertedFile(object):
         TODO : Complete this method
         """
         return self.__encode_posting_list(self.__map.keys()[0], self.__map[self.__map.keys()[0]])
+    
+    def display_map(self):
+        print(self.__map)
 
     @classmethod
     def __encode_key(cls, key):

@@ -1,4 +1,5 @@
 import nltk
+nltk.download('punkt')
 
 class Tokenizer:
     """
@@ -16,8 +17,6 @@ class Tokenizer:
         self.__punctuation = punctuation
         if stemming:
             self.__stemmer = nltk.stem.porter.PorterStemmer()
-            
-        nltk.download('punkt')
     
     def word_tokenize(self, paragraph):
         """
