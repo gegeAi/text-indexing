@@ -10,7 +10,6 @@ class Query:
 
 
 class NaiveQuery(Query):
-
     def __init__(self, query, tokenizer=nltk, conjunctive=True):
         super().__init__(query, tokenizer, conjunctive)
 
@@ -54,28 +53,29 @@ class FaginQuery(Query):
         super.__init__(query, tokenizer, conjunctive)
 
     def execute(self, inverted_file, top_k=5):
-        # The ith element of used_posting_list_sorted_by_score and used_posting_list_sorted_by_doc_id
+        # In this method, pl stands for "posting_list"
+
+        # The ith element of used_pl_sorted_by_score and used_pl_sorted_by_doc_id
         # correspond to the same document
-        used_posting_list_sorted_by_score = []
-        used_posting_list_sorted_by_doc_id = []
+        used_pl_sorted_by_score = []
+        used_pl_sorted_by_doc_id = []
         for token in self._query_token_list:
-            used_posting_list_sorted_by_doc_id.append(inverted_file.map[token])
-            used_posting_list_sorted_by_score.append(self.__sort_by_score(used_posting_list_sorted_by_doc_id[-1]))
+            used_pl_sorted_by_doc_id.append(inverted_file.map[token])
+            used_pl_sorted_by_score.append(self.__sort_by_score(used_pl_sorted_by_doc_id[-1]))
 
-        tau = 1e9
-        score_min = 1e9
+        tau = float("inf")
+        score_min = float("inf")
         current_best = []
-        index_table = [0 for _ in range(0, len(used_posting_list_sorted_by_score))]
+        index_table = [0 for _ in range(0, len(used_pl_sorted_by_score))]
+
         while len(current_best) < top_k and score_min < tau:
-            for index, i in enumerate(index_table):
-                document, current_document_score = used_posting_list_sorted_by_score[i][index]
-                # TODO: Rename index_bis (and j?)
-                for index_bis, j in enumerate(used_posting_list_sorted_by_doc_id):
-                    if i != j:
-                        current_document_score += self.__find_score_by_doc_id(used_posting_list_sorted_by_doc_id[j],
-                                                                              document)
-
-
+            for current_pl_index, index_in_current_pl in enumerate(index_table):
+                document, current_document_score = (
+                    used_pl_sorted_by_score[current_pl_index][index_in_current_pl])
+                for other_pl_index, index_in_other_pl in enumerate(used_pl_sorted_by_doc_id):
+                    if current_pl_index != other_pl_index:
+                        current_document_score += (
+                                self.__find_score_by_doc_id(used_pl_sorted_by_doc_id[other_pl_index], document))
 
     @staticmethod
     def __find_score_by_doc_id(posting_list, doc_id):
