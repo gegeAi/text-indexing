@@ -76,7 +76,11 @@ class FaginQuery(Query):
                     if current_pl_index != other_pl_index:
                         current_document_score += (
                                 self.__find_score_by_doc_id(used_pl_sorted_by_doc_id[other_pl_index], document))
-
+                # TODO: Combined score to finish ?
+                # TODO: If |C|<k
+                # TODO: Elif we have to replace the worst element of C
+                # TODO: If at least one doc has been seen in sorted access for each qt, update tau
+            # TODO: Parallel sorted access
     @staticmethod
     def __find_score_by_doc_id(posting_list, doc_id):
         for document, score in posting_list:
