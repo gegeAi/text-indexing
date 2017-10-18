@@ -80,12 +80,22 @@ class InvertedFile(object):
                     score = self.__score_function(token, document)
                     if token not in self.__map:
                         self.__map[token] = SortedList()
-                    self.__map[token].append((document['id'], score))
+                    self.__map[token].add((document['id'], score))
                     
 #----------------------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------SAVE AND LOAD------------------------------------------------------------------#
 #----------------------------------------------------------------------------------------------------------------------------------------#
 
+    def get_object_as_array(self):
+        """
+        Used for testing purposes, only encode the object without saving it
+        :return: bytearray, a binary representation of the full object
+        """
+        output = bytearray()
+        for (key, value) in self.__map.iteritems():
+            output += ndi.encode_posting_list(key, value)
+        return output
+    
     def save(self, filename):
         """
         Save the InvertedFile to the disc
