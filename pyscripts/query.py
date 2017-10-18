@@ -62,7 +62,6 @@ class FaginQuery(Query):
         for token in self._query_token_list:
             used_pl_sorted_by_doc_id.append(inverted_file.map[token])
             used_pl_sorted_by_score.append(self.__sort_by_score(used_pl_sorted_by_doc_id[-1]))
-
         tau = float("inf")
         score_min = float("inf")
         current_best = []
@@ -76,11 +75,17 @@ class FaginQuery(Query):
                     if current_pl_index != other_pl_index:
                         current_document_score += (
                                 self.__find_score_by_doc_id(used_pl_sorted_by_doc_id[other_pl_index], document))
-                # TODO: Combined score to finish ?
-                # TODO: If |C|<k
+                # TODO: CHECK Combined score to finish ? It seems good
+                # TODO: CHECK If |C|<k
+                if len(current_best) < top_k:
+                    current_best.append([document, current_document_score])
+                    self.__sort_by_score(current_best)
+                    score_min = current_best[-1]
                 # TODO: Elif we have to replace the worst element of C
+
                 # TODO: If at least one doc has been seen in sorted access for each qt, update tau
             # TODO: Parallel sorted access
+
     @staticmethod
     def __find_score_by_doc_id(posting_list, doc_id):
         for document, score in posting_list:
