@@ -1,1 +1,4 @@
 /latimes
+*.ipynb
+.idea/*
+pyscripts/__pycache__/*
