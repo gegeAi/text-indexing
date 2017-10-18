@@ -78,11 +78,13 @@ class FaginQuery(Query):
                 # TODO: CHECK Combined score to finish ? It seems good
                 # TODO: CHECK If |C|<k
                 if len(current_best) < top_k:
-                    current_best.append([document, current_document_score])
-                    self.__sort_by_score(current_best)
+                    self.__reverse_insort(current_best, [document, current_document_score])
                     score_min = current_best[-1]
-                # TODO: Elif we have to replace the worst element of C
-
+                # TODO: CHECK Elif we have to replace the worst element of C
+                elif score_min < current_document_score:
+                    current_best.pop()
+                    self.__reverse_insort(current_best, [document, current_document_score])
+                    score_min = current_best[-1]
                 # TODO: If at least one doc has been seen in sorted access for each qt, update tau
             # TODO: Parallel sorted access
 
@@ -95,3 +97,27 @@ class FaginQuery(Query):
     @staticmethod
     def __sort_by_score(posting_list):
         return sorted(posting_list, key=lambda x: x[1], reverse=True)
+
+    @staticmethod
+    def __reverse_insort(a, x, lo=0, hi=None):
+        """Insert item x in list a, and keep it reverse-sorted assuming a
+        is reverse-sorted.
+
+        If x is already in a, insert it to the right of the rightmost x.
+
+        Optional args lo (default 0) and hi (default len(a)) bound the
+        slice of a to be searched.
+
+        /!\ Adapted to use second element of tuple x as key /!\
+        """
+        if lo < 0:
+            raise ValueError('lo must be non-negative')
+        if hi is None:
+            hi = len(a)
+        while lo < hi:
+            mid = (lo + hi) // 2
+            if x[1] > a[mid][1]:
+                hi = mid
+            else:
+                lo = mid + 1
+        a.insert(lo, x)
