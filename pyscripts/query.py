@@ -66,27 +66,45 @@ class FaginQuery(Query):
         score_min = float("inf")
         current_best = []
         index_table = [0 for _ in range(0, len(used_pl_sorted_by_score))]
+        sorted_access_count = 0
+        seen_documents = set()
 
         while len(current_best) < top_k and score_min < tau:
             for current_pl_index, index_in_current_pl in enumerate(index_table):
                 document, current_document_score = (
                     used_pl_sorted_by_score[current_pl_index][index_in_current_pl])
+                if document in seen_documents:
+                    continue
+                else:
+                    seen_documents.add(document)
+                    # TODO: TOCHECK Count sorted accesses to know when to update tau
+                    sorted_access_count += 1
                 for other_pl_index, index_in_other_pl in enumerate(used_pl_sorted_by_doc_id):
                     if current_pl_index != other_pl_index:
                         current_document_score += (
                                 self.__find_score_by_doc_id(used_pl_sorted_by_doc_id[other_pl_index], document))
-                # TODO: CHECK Combined score to finish ? It seems good
-                # TODO: CHECK If |C|<k
+                # TODO: TOCHECK Improve parallel access to skip seen documents : Use seen_documents and index_table
+                # SEE also lines 76 to 79
+                index_table[current_pl_index] = index_in_current_pl + 1
+                # TODO: TOCHECK If |C|<k
                 if len(current_best) < top_k:
                     self.__reverse_insort(current_best, [document, current_document_score])
                     score_min = current_best[-1]
-                # TODO: CHECK Elif we have to replace the worst element of C
+                # TODO: TOCHECK Else if we have to replace the worst element of C
                 elif score_min < current_document_score:
                     current_best.pop()
                     self.__reverse_insort(current_best, [document, current_document_score])
                     score_min = current_best[-1]
-                # TODO: If at least one doc has been seen in sorted access for each qt, update tau
-            # TODO: Parallel sorted access
+                # TODO: TOCHECK If at least one doc has been seen in sorted access for each qt, update tau
+                if sorted_access_count >= len(index_table):
+                    tau = 0
+                    for tau_pl_index, index_in_tau_pl in enumerate(index_table):
+                        _, tau_i = (
+                            used_pl_sorted_by_score[tau_pl_index][index_in_tau_pl-1])
+                        tau += tau_i
+            # TODO: TOCHECK Is parallel sorted access ok ?
+        # TODO: TOCHECK Return
+        return current_best
 
     @staticmethod
     def __find_score_by_doc_id(posting_list, doc_id):
