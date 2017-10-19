@@ -82,8 +82,11 @@ class FaginQuery(Query):
                 # Search for the first unseen document from the current posting list, and increment the
                 # current posting list's index in the index_table
                 while True:
-                    document, current_document_score = (
-                        used_pl_sorted_by_score[current_pl_index][index_in_current_pl])
+                    current_pl_sorted_by_score = used_pl_sorted_by_score[current_pl_index]
+                    try:
+                        document, current_document_score = (current_pl_sorted_by_score[index_in_current_pl])
+                    except IndexError:  # All relevant documents have been seen
+                        return current_best
                     index_in_current_pl += 1
                     if document not in seen_documents:
                         seen_documents.add(document)
@@ -98,6 +101,8 @@ class FaginQuery(Query):
                         other_document_score = self.__find_score_by_doc_id(other_pl, document)
                         current_document_score = self._score_function(current_document_score, other_document_score)
 
+                if current_document_score < 0:
+                    continue
                 # TODO: TOCHECK If |C|<k
                 if len(current_best) < top_k:
                     self.__reverse_insert(current_best, [document, current_document_score])
@@ -118,7 +123,7 @@ class FaginQuery(Query):
         return current_best
 
     @staticmethod
-    def __find_score_by_doc_id(posting_list, doc_id, default_value=0):
+    def __find_score_by_doc_id(posting_list, doc_id, default_value=-1000):
         for document, score in posting_list:
             if doc_id == document:
                 return score
@@ -152,3 +157,84 @@ class FaginQuery(Query):
             else:
                 min_index = mid + 1
         list_.insert(min_index, x)
+
+
+if __name__=="__main__":
+    from pyscripts.inverted_file import InvertedFile
+    from pyscripts.formatted_document import FormattedDocument
+    from pyscripts.tokenizer import Tokenizer
+    from pyscripts.query import NaiveQuery
+    from pyscripts.query import FaginQuery
+    import glob
+    import xml.etree.ElementTree as ET
+    from xml.etree.ElementTree import ParseError
+
+
+    def read_files(paths, n=-1):
+        """
+        Read n files from a list of paths and convert them as xml trees. A root node <RAC> is added to every file to avoid some
+        ParseError
+        parameters :
+            - paths : enumeration of strings, a list of absolute paths where datas have to be read (datas must be xml files)
+            - n : number of files needed to be read, if -1, every possible files will be read
+        return :
+            - a list of len=(min(n, number of files) if n != -1, else number of files) of xml trees representations
+              of the documents
+        """
+        output = []
+        for path in paths:
+            try:
+                txt = open(path, 'r').read()
+                output.append(ET.fromstring('<RAC>' + txt + '</RAC>'))
+                n -= 1
+                print('Successfully parsed document <{}>'.format(path))
+            except ParseError as e:
+                print('Can\'t parse document <{}>. Doesn\'t matter, skip'.format(path))
+            except IsADirectoryError:
+                print('Can\'t parse directory <{}>. Doesn\'t matter, skip'.format(path))
+            if n == 0:
+                return output
+        return output
+
+
+    def score(token, document):
+        paragraph_tokens = document['text'].copy()
+        paragraph_tokens.append(document['title'])
+        token_count = 0
+        for paragraph in paragraph_tokens:
+            for word in paragraph:
+                if word == token:
+                    token_count += 1
+        return token_count
+
+
+    inverted_file = InvertedFile(score)
+
+    LATIMES_PATH = './latimes'
+    files = glob.iglob(LATIMES_PATH + '/*')
+    xml_files = read_files(files, 1)
+    fd = FormattedDocument(xml_root_doc=xml_files[0], tokenizer=Tokenizer())
+
+    # add the article of the loaded document to the inferted file
+    for doc in fd.matches:
+        inverted_file.add_document(doc)
+
+
+    def sort_by_score(posting_list):
+        return sorted(posting_list, key=lambda x: x[1], reverse=True)
+
+
+    # print("\nPL sorted by doc id :")
+    # house_pl = inverted_file.map["hous"]
+    # divorce_pl = inverted_file.map["divorc"]
+    # print(house_pl, "\n\n", divorce_pl)
+    # print("\n\nPL sorted by score :")
+    # print(sort_by_score(house_pl), "\n\n", sort_by_score(divorce_pl))
+
+    print("Create and execute fagin query")
+    query = FaginQuery("the, it", Tokenizer())
+    print(query.execute(inverted_file, 6))
+
+    print("Create and execute naive query")
+    naive_query = NaiveQuery("the, it", Tokenizer())
+    print(naive_query.execute(inverted_file, 6))
