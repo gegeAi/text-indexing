@@ -123,7 +123,7 @@ class FaginQuery(Query):
         return current_best
 
     @staticmethod
-    def __find_score_by_doc_id(posting_list, doc_id, default_value=-1000):
+    def __find_score_by_doc_id(posting_list, doc_id, default_value=-1000000):
         for document, score in posting_list:
             if doc_id == document:
                 return score
@@ -176,7 +176,7 @@ if __name__ == "__main__":
                 print("Begin to execute queries with {} terms".format(number_of_terms))
                 print(query)
                 start_time = time.time()
-                fagin_query = FaginQuery(query, Tokenizer())
+                fagin_query = FaginQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
                 print(fagin_query.execute(inverted_file, top_k))
                 end_time = time.time()
                 time_output_fagin.write(
@@ -195,7 +195,7 @@ if __name__ == "__main__":
                 print("Begin to execute queries with {} terms".format(number_of_terms))
                 print(query)
                 start_time = time.time()
-                naive_query = NaiveQuery(query, Tokenizer())
+                naive_query = NaiveQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
                 print(naive_query.execute(inverted_file, top_k))
                 end_time = time.time()
                 time_output_naive.write(
@@ -212,7 +212,7 @@ if __name__ == "__main__":
                 print("Begin to execute queries with top_k = {}".format(top_k))
                 print(query)
                 start_time = time.time()
-                fagin_query = FaginQuery(query, Tokenizer())
+                fagin_query = FaginQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
                 print(fagin_query.execute(inverted_file, top_k))
                 end_time = time.time()
                 time_output_fagin.write(
@@ -229,7 +229,7 @@ if __name__ == "__main__":
                 print("Begin to execute queries with top_k = {}".format(top_k))
                 print(query)
                 start_time = time.time()
-                naive_query = NaiveQuery(query, Tokenizer())
+                naive_query = NaiveQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
                 print(naive_query.execute(inverted_file, top_k))
                 end_time = time.time()
                 time_output_naive.write(

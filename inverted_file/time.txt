@@ -1,0 +1,31 @@
+
+
+========== Run beginning at 1508449559.3587463===========number_of_files :21time :188.66826224327087number_of_files :1time :7.940742492675781
+
+========== Run beginning at 1508450038.2934387===========
+
+
+========== Run beginning at 1508450096.5545561===========
+number_of_files : 21time : 122.30651235580444
+number_of_files : 1time : 8.428541421890259
+
+
+========== Run beginning at 1508450566.77578===========
+
+
+========== Run beginning at 1508450635.7872987===========
+number_of_files : 730 time : 3690.992695569992
+number_of_files : 680 time : 3458.929894924164
+number_of_files : 630 time : 3148.001625776291
+number_of_files : 580 time : 2878.61474275589
+number_of_files : 530 time : 2638.0112631320953
+number_of_files : 480 time : 2444.372892141342
+number_of_files : 430 time : 2215.362839460373
+number_of_files : 380 time : 1954.5646839141846
+number_of_files : 330 time : 1712.4098734855652
+number_of_files : 280 time : 1426.0977346897125
+number_of_files : 230 time : 1180.4218780994415
+number_of_files : 180 time : 920.7303471565247
+number_of_files : 130 time : 648.2867410182953
+number_of_files : 80 time : 405.58479833602905
+number_of_files : 30 time : 152.01075220108032
