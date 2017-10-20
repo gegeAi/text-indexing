@@ -241,10 +241,10 @@ if __name__ == "__main__":
                 "say her she"
     inverted_file = InvertedFile(None)
     top_k = 10
-    # query_length_benchmark_fagin(inverted_file, max_query, top_k)
-    # query_length_benchmark_naive(inverted_file, max_query, top_k)
+    query_length_benchmark_fagin(inverted_file, max_query, top_k)
+    query_length_benchmark_naive(inverted_file, max_query, top_k)
     max_top_k = 30
-    # top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
+    top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
     top_k_benchmark_naive(inverted_file, max_query, max_top_k)
 
 
