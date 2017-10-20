@@ -74,7 +74,7 @@ class FaginQuery(Query):
             used_pl_sorted_by_doc_id.append(inverted_file.map[token])
             used_pl_sorted_by_score.append(self.__sort_by_score(used_pl_sorted_by_doc_id[-1]))
         tau = float("inf")
-        score_min = 1e9 # not initialize to infinity in order to go through the first step of the while loop
+        score_min = 1e9  # not initialize to infinity in order to go through the first step of the while loop
         current_best = []
         index_table = [0 for _ in range(0, len(used_pl_sorted_by_score))]
         sorted_access_count = 0
@@ -162,13 +162,60 @@ class FaginQuery(Query):
 if __name__ == "__main__":
     from pyscripts.inverted_file import InvertedFile
     from pyscripts.tokenizer import Tokenizer
+    import time
 
-    top_k = 8
+
+    def query_length_benchmark_fagin(inverted_file: InvertedFile, max_query: str, top_k: int):
+        max_splitted = max_query.split()
+        number_of_terms = len(max_splitted)
+        time_output_filename = "query/time_terms_fagin.txt"
+        with open(time_output_filename, "a") as time_output_fagin:
+            time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+            while number_of_terms > 0:
+                query = " ".join(max_splitted[:number_of_terms])
+                print("Begin to execute queries with {} terms".format(number_of_terms))
+                print(query)
+                start_time = time.time()
+                fagin_query = FaginQuery(query, Tokenizer())
+                print(fagin_query.execute(inverted_file, top_k))
+                end_time = time.time()
+                time_output_fagin.write(
+                    "number_of_terms : " + str(number_of_terms) + " time : " + str(end_time - start_time) +
+                    "\n")
+                number_of_terms -= 1
+
+    def query_length_benchmark_naive(inverted_file: InvertedFile, max_query: str, top_k: int):
+        max_splitted = max_query.split()
+        number_of_terms = len(max_splitted)
+        time_output_filename = "query/time_terms_naive.txt"
+        with open(time_output_filename, "a") as time_output_naive:
+            time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+            while number_of_terms > 0:
+                query = " ".join(max_splitted[:number_of_terms])
+                print("Begin to execute queries with {} terms".format(number_of_terms))
+                print(query)
+                start_time = time.time()
+                naive_query = NaiveQuery(query, Tokenizer())
+                print(naive_query.execute(inverted_file, top_k))
+                end_time = time.time()
+                time_output_naive.write(
+                    "number_of_terms : " + str(number_of_terms) + " time : " + str(end_time - start_time) +
+                    "\n")
+                number_of_terms -= 1
+
+
+    max_query = "the be to of and a in that have I it for not on with he as you do at this but his by from they we " \
+                "say her she"
     inverted_file = InvertedFile(None)
-    print("Create and execute fagin query")
-    query = FaginQuery("the horse in the field", Tokenizer())
-    print(query.execute(inverted_file, top_k))
+    top_k = 10
+    #query_length_benchmark_fagin(inverted_file, max_query, top_k)
+    query_length_benchmark_naive(inverted_file, max_query, top_k)
 
-    print("Create and execute naive query")
-    naive_query = NaiveQuery("The horse in the field", Tokenizer())
-    print(naive_query.execute(inverted_file, top_k))
+
+    # print("Create and execute fagin query")
+    # query = FaginQuery("The horse in the field", Tokenizer())
+    # print(query.execute(inverted_file, top_k))
+    #
+    # print("Create and execute naive query")
+    # naive_query = NaiveQuery("The horse in the field", Tokenizer())
+    # print(naive_query.execute(inverted_file, top_k))
