@@ -170,5 +170,5 @@ if __name__ == "__main__":
     print(query.execute(inverted_file, top_k))
 
     print("Create and execute naive query")
-    naive_query = NaiveQuery("the, it", Tokenizer())
+    naive_query = NaiveQuery("The horse in the field", Tokenizer())
     print(naive_query.execute(inverted_file, top_k))

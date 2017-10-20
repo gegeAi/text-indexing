@@ -235,15 +235,16 @@ if __name__ == "__main__":
     from pyscripts.formatted_document import FormattedDocument
     from pyscripts.tokenizer import Tokenizer
     import glob
+    import time
     import xml.etree.ElementTree as ET
     from xml.etree.ElementTree import ParseError
 
     def read_files(paths, n=-1):
         """
-        Read n files from a list of paths and convert them as xml trees. A root node <RAC> is added to every file to avoid some
-        ParseError
+        Read n files from a list of paths and convert them as xml trees. A root node <RAC> is added to every file to
+        avoid some ParseError
         parameters :
-            - paths : enumeration of strings, a list of absolute paths where datas have to be read (datas must be xml files)
+            - paths : enumeration of strings, a list of absolute paths where data have to be read (data must be xml files)
             - n : number of files needed to be read, if -1, every possible files will be read
         return :
             - a list of len=(min(n, number of files) if n != -1, else number of files) of xml trees representations
@@ -256,7 +257,7 @@ if __name__ == "__main__":
                 output.append(ET.fromstring('<RAC>' + txt + '</RAC>'))
                 n -= 1
                 print('Successfully parsed document <{}>'.format(path))
-            except ParseError as e:
+            except ParseError:
                 print('Can\'t parse document <{}>. Doesn\'t matter, skip'.format(path))
             except IsADirectoryError:
                 print('Can\'t parse directory <{}>. Doesn\'t matter, skip'.format(path))
@@ -274,15 +275,29 @@ if __name__ == "__main__":
                     token_count += 1
         return token_count
 
-    inverted_file = InvertedFile(score)
 
     LATIMES_PATH = './latimes'
     files = glob.iglob(LATIMES_PATH + '/*')
-    xml_files = read_files(files, 10)
+    xml_files = read_files(files)
 
-    for xml_file in xml_files:
-        fd = FormattedDocument(xml_file, tokenizer=Tokenizer())
-        for doc in fd.matches:
-            inverted_file.add_document(doc)
+    number_of_files = len(xml_files)
+    time_output_filename = "inverted_file/time.txt"
+    with open(time_output_filename, "a") as time_output:
+        time_output.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+        while number_of_files > 0:
+            inverted_file = InvertedFile(score)
+            print("Begin to create inverted file with {} files".format(number_of_files))
+            current_xml_files = xml_files[0:number_of_files]
+            start_time = time.time()
+            for xml_file in current_xml_files:
+                fd = FormattedDocument(xml_file, tokenizer=Tokenizer())
+                for doc in fd.matches:
+                    inverted_file.add_document(doc)
+            end_time = time.time()
 
-    inverted_file.save("inverted_file.if")
+            time_output.write("number_of_files : " + str(number_of_files) + " time : " + str(end_time - start_time) +
+                              "\n")
+            inverted_file.save("inverted_file/inverted_file_{}.if".format(number_of_files))
+            number_of_files -= 50
+
+
