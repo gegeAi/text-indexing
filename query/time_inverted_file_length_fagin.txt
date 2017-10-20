@@ -1,0 +1,18 @@
+
+
+========== Run beginning at 1508504168.1898217===========
+inverted_file_length : 730 time : 44.591052770614624
+inverted_file_length : 680 time : 44.145899534225464
+inverted_file_length : 630 time : 35.478461265563965
+inverted_file_length : 580 time : 33.60834741592407
+inverted_file_length : 530 time : 25.449609994888306
+inverted_file_length : 480 time : 24.795186042785645
+inverted_file_length : 430 time : 21.591356992721558
+inverted_file_length : 380 time : 19.280367851257324
+inverted_file_length : 330 time : 14.128541231155396
+inverted_file_length : 280 time : 13.633549690246582
+inverted_file_length : 230 time : 9.877042531967163
+inverted_file_length : 180 time : 7.011212348937988
+inverted_file_length : 130 time : 6.524404525756836
+inverted_file_length : 80 time : 4.505346059799194
+inverted_file_length : 30 time : 2.647592306137085

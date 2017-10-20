@@ -63,7 +63,6 @@ class FaginQuery(Query):
 
     def execute(self, inverted_file, top_k=5):
         # In this method, pl stands for "posting_list"
-
         inverted_file.read_posting_lists(self._query_token_list, self._filename)
 
         # The ith element of used_pl_sorted_by_score and used_pl_sorted_by_doc_id
@@ -73,6 +72,7 @@ class FaginQuery(Query):
         for token in self._query_token_list:
             used_pl_sorted_by_doc_id.append(inverted_file.map[token])
             used_pl_sorted_by_score.append(self.__sort_by_score(used_pl_sorted_by_doc_id[-1]))
+
         tau = float("inf")
         score_min = 1e9  # not initialize to infinity in order to go through the first step of the while loop
         current_best = []
@@ -120,6 +120,7 @@ class FaginQuery(Query):
                     for tau_pl_index, index_in_tau_pl in enumerate(index_table):
                         _, tau_i = used_pl_sorted_by_score[tau_pl_index][index_in_tau_pl - 1]
                         tau += tau_i
+
         return current_best
 
     @staticmethod
@@ -237,16 +238,54 @@ if __name__ == "__main__":
                     "\n")
                 top_k -= 1
 
+    def inverted_file_length_benchmark_fagin(inverted_file, query, top_k, inverted_file_length):
+        time_output_filename = "query/time_inverted_file_length_fagin.txt"
+        with open(time_output_filename, "a") as time_output_fagin:
+            time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+            while inverted_file_length > 0:
+                print("Begin to execute query with inverted file length = {}".format(inverted_file_length))
+                print(query)
+                start_time = time.time()
+                fagin_query = FaginQuery(query, Tokenizer(), "inverted_file/inverted_file_{}.if".
+                                         format(inverted_file_length))
+                print(fagin_query.execute(inverted_file, top_k))
+                end_time = time.time()
+                time_output_fagin.write(
+                    "inverted_file_length : " + str(inverted_file_length) + " time : " + str(end_time - start_time) +
+                    "\n")
+                inverted_file_length -= 50
+
+    def inverted_file_length_benchmark_naive(inverted_file, query, top_k, inverted_file_length):
+        time_output_filename = "query/time_inverted_file_length_naive.txt"
+        with open(time_output_filename, "a") as time_output_naive:
+            time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+            while inverted_file_length > 0:
+                print("Begin to execute query with inverted file length = {}".format(inverted_file_length))
+                print(query)
+                start_time = time.time()
+                naive_query = NaiveQuery(query, Tokenizer(), "inverted_file/inverted_file_{}.if".
+                                         format(inverted_file_length))
+                print(naive_query.execute(inverted_file, top_k))
+                end_time = time.time()
+                time_output_naive.write(
+                    "inverted_file_length : " + str(inverted_file_length) + " time : " + str(end_time - start_time) +
+                    "\n")
+                inverted_file_length -= 50
+
+
     max_query = "the be to of and a in that have I it for not on with he as you do at this but his by from they we " \
                 "say her she"
     inverted_file = InvertedFile(None)
     top_k = 10
-    query_length_benchmark_fagin(inverted_file, max_query, top_k)
-    query_length_benchmark_naive(inverted_file, max_query, top_k)
-    max_top_k = 30
-    top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
-    top_k_benchmark_naive(inverted_file, max_query, max_top_k)
+    inverted_file_length = 730
 
+    # query_length_benchmark_fagin(inverted_file, max_query, top_k)
+    # query_length_benchmark_naive(inverted_file, max_query, top_k)
+    # max_top_k = 30
+    # top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
+    # top_k_benchmark_naive(inverted_file, max_query, max_top_k)
+    inverted_file_length_benchmark_fagin(inverted_file, max_query, top_k, inverted_file_length)
+    inverted_file_length_benchmark_naive(inverted_file, max_query, top_k, inverted_file_length)
 
     # print("Create and execute fagin query")
     # query = FaginQuery("The horse in the field", Tokenizer())
