@@ -51,7 +51,8 @@ def score(token, document):
 
 
 LATIMES_PATH = './latimes'
-files = glob.iglob(LATIMES_PATH + '/*')
+files = glob.iglob(LATIMES_PATH + '/la*')
+xml_files = read_files(files)
 
 start_time = time.time()
 
@@ -61,15 +62,15 @@ merged_file_index = 0
 old_merge_file_name = None
 old_merge_time = 0.0
 
+print(len(xml_files), "files found")
+
 logfilename = "benchmerge.log"
 with open(logfilename, "w") as logfile:
-    for file in files:
+    for xml_file in xml_files:
         start_time = time.time()
         # create an inverted file for the current doc
         inverted_file = InvertedFile(score)
-        file_name = os.path.basename(file)
-        out_file_name = FILE_NON_MERGE_PREFIX + file_name
-        xml_file = read_files([file])
+        out_file_name = FILE_NON_MERGE_PREFIX + str(merged_file_index)
         fd = FormattedDocument(xml_file, tokenizer=Tokenizer())
         for doc in fd.matches:
             inverted_file.add_document(doc)
@@ -80,10 +81,12 @@ with open(logfilename, "w") as logfile:
             new_merge_file_name = FILE_MERGE_PREFIX + str(merged_file_index)
             InvertedFile.merge_inverted_files(new_merge_file_name, old_merge_file_name, out_file_name)
             old_merge_file_name = new_merge_file_name
-            merged_file_index += 1
         else:
             old_merge_file_name = out_file_name
         merge_time = time.time()
         old_merge_time += merge_time - start_time
-        logfile.write(str(if_save_time - start_time) + "," + str(merge_time - if_save_time) +
-                      "," + str(merge_time - start_time) + "," + str(old_merge_time))
+        log_text = str(if_save_time - start_time) + "," \
+                   + str(merge_time - if_save_time) + "," + str(merge_time - start_time)\
+                   + "," + str(old_merge_time) + "\n"
+        logfile.write(log_text)
+        merged_file_index += 1
