@@ -1,6 +1,6 @@
 from sortedcontainers import SortedDict as sd
 from sortedcontainers import SortedList
-from .naive_disc_interfacer import NaiveDiscInterfacer as ndi
+from pyscripts.naive_disc_interfacer import NaiveDiscInterfacer as ndi
 
 
 class OutOfBoundError(Exception):
@@ -230,3 +230,59 @@ class InvertedFile(object):
                             key_if2, pl_if2 = cls.__read_key_and_posting_list(if2)
                         output.write(ndi.encode_posting_list(key, posting_list))
 
+
+if __name__ == "__main__":
+    from pyscripts.formatted_document import FormattedDocument
+    from pyscripts.tokenizer import Tokenizer
+    import glob
+    import xml.etree.ElementTree as ET
+    from xml.etree.ElementTree import ParseError
+
+    def read_files(paths, n=-1):
+        """
+        Read n files from a list of paths and convert them as xml trees. A root node <RAC> is added to every file to avoid some
+        ParseError
+        parameters :
+            - paths : enumeration of strings, a list of absolute paths where datas have to be read (datas must be xml files)
+            - n : number of files needed to be read, if -1, every possible files will be read
+        return :
+            - a list of len=(min(n, number of files) if n != -1, else number of files) of xml trees representations
+              of the documents
+        """
+        output = []
+        for path in paths:
+            try:
+                txt = open(path, 'r').read()
+                output.append(ET.fromstring('<RAC>' + txt + '</RAC>'))
+                n -= 1
+                print('Successfully parsed document <{}>'.format(path))
+            except ParseError as e:
+                print('Can\'t parse document <{}>. Doesn\'t matter, skip'.format(path))
+            except IsADirectoryError:
+                print('Can\'t parse directory <{}>. Doesn\'t matter, skip'.format(path))
+            if n == 0:
+                return output
+        return output
+
+    def score(token, document):
+        paragraph_tokens = document['text'].copy()
+        paragraph_tokens.append(document['title'])
+        token_count = 0
+        for paragraph in paragraph_tokens:
+            for word in paragraph:
+                if word == token:
+                    token_count += 1
+        return token_count
+
+    inverted_file = InvertedFile(score)
+
+    LATIMES_PATH = './latimes'
+    files = glob.iglob(LATIMES_PATH + '/*')
+    xml_files = read_files(files, 10)
+
+    for xml_file in xml_files:
+        fd = FormattedDocument(xml_file, tokenizer=Tokenizer())
+        for doc in fd.matches:
+            inverted_file.add_document(doc)
+
+    inverted_file.save("inverted_file.if")
