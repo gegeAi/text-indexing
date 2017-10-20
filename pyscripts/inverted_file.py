@@ -40,9 +40,10 @@ class InvertedFile(object):
          more infos)
     """
 
-    def __init__(self, score_function):
+    def __init__(self, score_function, disc_interfacer=ndi):
         self.__map = sd()
         self.__score_function = score_function
+        self.di = disc_interfacer
 
     @property
     def map(self):
@@ -93,7 +94,7 @@ class InvertedFile(object):
         """
         output = bytearray()
         for (key, value) in self.__map.iteritems():
-            output += ndi.encode_posting_list(key, value)
+            output += self.di.encode_posting_list(key, value)
         return output
     
     def save(self, filename):
@@ -104,13 +105,13 @@ class InvertedFile(object):
         """
         output = bytearray()
         for (key, value) in self.__map.iteritems():
-            output += ndi.encode_posting_list(key, value)
+            output += self.di.encode_posting_list(key, value)
         with open(filename, 'wb+')as f:
             f.write(output)
             
     def read_posting_lists(self, keys, filename):
         """
-        Read and decode the posting lists corresponding to their associated keys given in parameters, from a given file.
+        Read and decode the posting lists correspoself.ding to their associated keys given in parameters, from a given file.
         Load them into the current object.
         :param keys: list of string, represents the posting lists that need to be decoded
         :param filename: string, the name of the file to read on disc
@@ -124,7 +125,7 @@ class InvertedFile(object):
                     break
                 # if key is one of the wanted keys
                 if keys is None or key in keys:
-                    posting_list = ndi.decode_list(f.read(list_len))
+                    posting_list = self.di.decode_list(f.read(list_len))
                     self.__map[key] = posting_list
                 else:
                     f.seek(list_len, 1)
@@ -153,7 +154,7 @@ class InvertedFile(object):
     def __read_key_and_list_len(cls, file):
         """
         Read the next few bytes of a binary file and decode them.
-        Precondition : The next bytes must represent a key and the length of an associated posting list shaped as :
+        Precoself.dition : The next bytes must represent a key and the length of an associated posting list shaped as :
         <key_size(1 byte)><key(key_size bytes)><list_len(list_len_len bytes)>
         :param file: File, the binary file to read the next bytes in
         :return: a tuple (key, list_len) where :
@@ -161,17 +162,17 @@ class InvertedFile(object):
             - list_len : integer, the length (in bytes) of the next posting list
         """
         # get key
-        bin_key_len = file.read(ndi.key_len_len)
-        if len(bin_key_len) != ndi.key_len_len:
+        bin_key_len = file.read(self.di.key_len_len)
+        if len(bin_key_len) != self.di.key_len_len:
             return None, None
-        key_len = ndi.decode_number(bin_key_len)
+        key_len = self.di.decode_number(bin_key_len)
 
         bin_key = file.read(key_len)
         key = bin_key.decode('utf-8')
 
         # get list len
-        bin_list_len = file.read(ndi.list_len_len)
-        list_len = ndi.decode_number(bin_list_len)
+        bin_list_len = file.read(self.di.list_len_len)
+        list_len = self.di.decode_number(bin_list_len)
 
         return key, list_len
     
@@ -189,7 +190,7 @@ class InvertedFile(object):
                 - score : integer, the score of this article relative to the keyword of this posting list
         """
         key, list_len = cls.__read_key_and_list_len(file)
-        posting_list = ndi.decode_list(file.read(list_len))
+        posting_list = self.di.decode_list(file.read(list_len))
         return key, posting_list
 
 #----------------------------------------------------------------------------------------------------------------------------------------#
@@ -228,7 +229,7 @@ class InvertedFile(object):
                             key = key_if1
                             key_if1, pl_if1 = cls.__read_key_and_posting_list(if1)
                             key_if2, pl_if2 = cls.__read_key_and_posting_list(if2)
-                        output.write(ndi.encode_posting_list(key, posting_list))
+                        output.write(self.di.encode_posting_list(key, posting_list))
 
 
 if __name__ == "__main__":
