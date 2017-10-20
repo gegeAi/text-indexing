@@ -203,13 +203,49 @@ if __name__ == "__main__":
                     "\n")
                 number_of_terms -= 1
 
+    def top_k_benchmark_fagin(inverted_file: InvertedFile, query: str, max_top_k: int):
+        top_k = max_top_k
+        time_output_filename = "query/time_top_k_fagin.txt"
+        with open(time_output_filename, "a") as time_output_fagin:
+            time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+            while top_k > 0:
+                print("Begin to execute queries with top_k = {}".format(top_k))
+                print(query)
+                start_time = time.time()
+                fagin_query = FaginQuery(query, Tokenizer())
+                print(fagin_query.execute(inverted_file, top_k))
+                end_time = time.time()
+                time_output_fagin.write(
+                    "top_k : " + str(top_k) + " time : " + str(end_time - start_time) +
+                    "\n")
+                top_k -= 1
+
+    def top_k_benchmark_naive(inverted_file: InvertedFile, query: str, max_top_k: int):
+        top_k = max_top_k
+        time_output_filename = "query/time_top_k_naive.txt"
+        with open(time_output_filename, "a") as time_output_naive:
+            time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
+            while top_k > 0:
+                print("Begin to execute queries with top_k = {}".format(top_k))
+                print(query)
+                start_time = time.time()
+                naive_query = NaiveQuery(query, Tokenizer())
+                print(naive_query.execute(inverted_file, top_k))
+                end_time = time.time()
+                time_output_naive.write(
+                    "top_k : " + str(top_k) + " time : " + str(end_time - start_time) +
+                    "\n")
+                top_k -= 1
 
     max_query = "the be to of and a in that have I it for not on with he as you do at this but his by from they we " \
                 "say her she"
     inverted_file = InvertedFile(None)
     top_k = 10
-    #query_length_benchmark_fagin(inverted_file, max_query, top_k)
-    query_length_benchmark_naive(inverted_file, max_query, top_k)
+    # query_length_benchmark_fagin(inverted_file, max_query, top_k)
+    # query_length_benchmark_naive(inverted_file, max_query, top_k)
+    max_top_k = 30
+    # top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
+    top_k_benchmark_naive(inverted_file, max_query, max_top_k)
 
 
     # print("Create and execute fagin query")
