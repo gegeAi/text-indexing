@@ -120,7 +120,7 @@ class InvertedFile(object):
         with open(filename, 'rb') as f:
 
             while True:
-                key, list_len = self.__read_key_and_list_len(f)
+                key, list_len = self.__read_key_and_list_len(f, self.di)
                 if key is None:
                     break
                 # if key is one of the wanted keys
@@ -131,7 +131,7 @@ class InvertedFile(object):
                     f.seek(list_len, 1)
     
     @classmethod
-    def read_only_keys(cls, filename):
+    def read_only_keys(cls, filename, interfacer=ndi):
         """
         Read a binary file and extract only the keys, skipping the reading of their associated posting lists
         :param filename: string, the path of the inverted file to be read on disc
@@ -142,7 +142,7 @@ class InvertedFile(object):
 
             while True:
                 position = f.tell()
-                key, list_len = cls.__read_key_and_list_len(f)
+                key, list_len = cls.__read_key_and_list_len(f, interfacer)
                 if key is None:
                     break
                 output.append((key, position))
@@ -151,7 +151,7 @@ class InvertedFile(object):
         return output
                     
     @classmethod
-    def __read_key_and_list_len(cls, file):
+    def __read_key_and_list_len(cls, file, interfacer=ndi):
         """
         Read the next few bytes of a binary file and decode them.
         Precoself.dition : The next bytes must represent a key and the length of an associated posting list shaped as :
@@ -162,22 +162,22 @@ class InvertedFile(object):
             - list_len : integer, the length (in bytes) of the next posting list
         """
         # get key
-        bin_key_len = file.read(self.di.key_len_len)
-        if len(bin_key_len) != self.di.key_len_len:
+        bin_key_len = file.read(interfacer.key_len_len)
+        if len(bin_key_len) != interfacer.key_len_len:
             return None, None
-        key_len = self.di.decode_number(bin_key_len)
+        key_len = interfacer.decode_number(bin_key_len)
 
         bin_key = file.read(key_len)
         key = bin_key.decode('utf-8')
 
         # get list len
-        bin_list_len = file.read(self.di.list_len_len)
-        list_len = self.di.decode_number(bin_list_len)
+        bin_list_len = file.read(interfacer.list_len_len)
+        list_len = interfacer.decode_number(bin_list_len)
 
         return key, list_len
     
     @classmethod
-    def __read_key_and_posting_list(cls, file):
+    def __read_key_and_posting_list(cls, file, interfacer=ndi):
         """
         Read the next few bytes of a binary file and decode them.
         Precondition : The next bytes must represent posting list and its associated key shaped as :
@@ -189,8 +189,8 @@ class InvertedFile(object):
                 - doc_id : integer, the unique id of an paper article
                 - score : integer, the score of this article relative to the keyword of this posting list
         """
-        key, list_len = cls.__read_key_and_list_len(file)
-        posting_list = self.di.decode_list(file.read(list_len))
+        key, list_len = cls.__read_key_and_list_len(file, interfacer)
+        posting_list = interfacer.decode_list(file.read(list_len))
         return key, posting_list
 
 #----------------------------------------------------------------------------------------------------------------------------------------#

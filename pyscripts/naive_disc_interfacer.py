@@ -6,7 +6,7 @@ class NaiveDiscInterfacer(object):
 
         - score_len : integer, the max number of bytes allowed for the encoding of a score
         - id_len : integer, the max number of bytes allowed for the encoding of a docid
-        - list_len_len : integer, the max number of bytes allowed for the encoding of the size of a value associated in __map (in bytes)
+        - list_len_len : integer, the max number of bytes allowed for the encoding of the size of a value associated in _map (in bytes)
           Example : if list_len_len = 4, then the maximum size of a list is pow(2, 8*4) -1 bytes
         - key_len_len : integer, the max number of bytes allowed for the encoding of the size of the key (in bytes)
 
@@ -25,7 +25,7 @@ class NaiveDiscInterfacer(object):
 #----------------------------------------------------------------------------------------------------------------------------------------#
 
     @classmethod
-    def __encode_number(cls, number, bin_size):
+    def _encode_number(cls, number, bin_size):
         """
         Encode an number in binary over an arbitrary number of bytes
         :param number: integer, the number to be binary encoded
@@ -46,37 +46,37 @@ class NaiveDiscInterfacer(object):
         return output
 
     @classmethod
-    def __encode_key(cls, key):
+    def _encode_key(cls, key):
         """
         Encode a string in binary, in the format : <key_size(key_len_len byte)><key(key_size bytes)>
         :param key : string, the key to encode
         :return: bytearray, the string encoded
         """
         output = bytearray(key, 'utf-8')
-        len_part = cls.__encode_number(len(output), cls.key_len_len)
+        len_part = cls._encode_number(len(output), cls.key_len_len)
         output = len_part + output
         return output
 
     @classmethod
-    def __encode_score(cls, score):
+    def _encode_score(cls, score):
         """
         Encode an integer in binary, in the format : <score(score_len bytes)>
         :param score : integer, the number to encode
         :return: bytearray, the number encoded
         """
-        return cls.__encode_number(score, cls.score_len)
+        return cls._encode_number(score, cls.score_len)
 
     @classmethod
-    def __encode_doc_id(cls, doc_id):
+    def _encode_doc_id(cls, doc_id):
         """
         Encode an integer in binary, in the format : <id(id_len bytes)>
         :param doc_id : integer, the number to encode
         :return: bytearray, the number encoded
         """
-        return cls.__encode_number(doc_id, cls.id_len)
+        return cls._encode_number(doc_id, cls.id_len)
 
     @classmethod
-    def __encode_list(cls, map_content):
+    def _encode_list(cls, map_content):
         """
         Encode a list of (integer docid, integer score) in binary, in the format : 
         <list_len(list_len_len bytes)>( (<doc_id(id_len bytes)><score(score_len bytes)>)*N )
@@ -87,9 +87,9 @@ class NaiveDiscInterfacer(object):
         """
         output = bytearray()
         for (doc_id, score) in map_content:
-            output += cls.__encode_doc_id(doc_id)
-            output += cls.__encode_score(score)
-        list_len = cls.__encode_number(len(output), cls.list_len_len)
+            output += cls._encode_doc_id(doc_id)
+            output += cls._encode_score(score)
+        list_len = cls._encode_number(len(output), cls.list_len_len)
         output = list_len + output
         return output
 
@@ -104,7 +104,7 @@ class NaiveDiscInterfacer(object):
                 - score : integer, score of an article relative to some word
         :return: bytearray, the pair encoded
         """
-        return cls.__encode_key(key) + cls.__encode_list(map_content)
+        return cls._encode_key(key) + cls._encode_list(map_content)
 
 #----------------------------------------------------------------------------------------------------------------------------------------#
 #---------------------------------------------------------NAIVE DECODING-----------------------------------------------------------------#
@@ -124,7 +124,7 @@ class NaiveDiscInterfacer(object):
         return int_val
     
     @classmethod
-    def __decode_article(cls, bin_article):
+    def _decode_article(cls, bin_article):
         """
         Decode the binary representation of an element of a posting list of shape (doc_id, score)
         :param bin_article: bytearray, the binary representation of an element of a posting list, encoded as 
@@ -140,7 +140,7 @@ class NaiveDiscInterfacer(object):
         return doc_id, score
     
     @classmethod
-    def __bin_article_regenerator(cls, bin_list, size_of_article):
+    def _bin_article_regenerator(cls, bin_list, size_of_article):
         """
         Generator, cut a binary posting list into separate tuples (doc_id, score) and yield them
         :param bin_list: bytearray, the binary representation of a posting list
@@ -164,8 +164,8 @@ class NaiveDiscInterfacer(object):
             - score : integer, the score of this article relative to the keyword of this posting list
         """
         output = []
-        article_gen = cls.__bin_article_regenerator(bin_list, cls.id_len + cls.score_len)
+        article_gen = cls._bin_article_regenerator(bin_list, cls.id_len + cls.score_len)
         for bin_article in article_gen:
-            output.append(cls.__decode_article(bin_article))
+            output.append(cls._decode_article(bin_article))
 
         return output
