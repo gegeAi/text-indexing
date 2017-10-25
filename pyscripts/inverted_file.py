@@ -198,12 +198,13 @@ class InvertedFile(object):
 #----------------------------------------------------------------------------------------------------------------------------------------#
 
     @classmethod
-    def merge_inverted_files(cls, filename_merge, filename_if1, filename_if2):
+    def merge_inverted_files(cls, filename_merge, filename_if1, filename_if2, disc_interfacer):
         """
         Merge two inverted files saved on disc into one.
         :param filename_merge: string, the path to the newly created inverted file
         :param filename_if1: string, the path to the first inverted file to merge
         :param filename_if2: string, the path to the second inverted file to merge
+        :param disc_interfacer: class, one of NaiveDiscInterfacer and SmartDiscInterfacer, explain the way if1 and if2 are encoded
         :return: None
         """
 
@@ -229,7 +230,7 @@ class InvertedFile(object):
                             key = key_if1
                             key_if1, pl_if1 = cls.__read_key_and_posting_list(if1)
                             key_if2, pl_if2 = cls.__read_key_and_posting_list(if2)
-                        output.write(self.di.encode_posting_list(key, posting_list))
+                        output.write(disc_interfacer.encode_posting_list(key, posting_list))
 
 
 if __name__ == "__main__":
