@@ -2,17 +2,39 @@ import nltk
 
 
 class Query:
-    def __init__(self, query, tokenizer=nltk, filename="inverted_file.if", conjunctive=True):
+    """
+    Class made to group features of both naive and fagin query processors.
+    Initialize :
+            - query: the string made of words to search.
+            - tokenizer: the user provided tokenizer. It is advised to provide the same used to create the inverted
+                file.
+            - filename: the path to your stored inverted file.
+            - conjunctive: whether the query is conjunctive or something else. If something else, an error is raised
+    Attributes :
+        - _conjunctive: whether the query is conjunctive or something else.
+        - _filename: the path to the provided stored inverted file.
+        - _query_token_list: the list of tokens in the query
+    Error :
+        - ValueError: if the query is empty.
+        - NotImplementedError: if the query is not conjunctive.
+    """
+    def __init__(self, query, tokenizer, filename, conjunctive):
         self._query_token_list = list(set(tokenizer.word_tokenize(query)))  # remove duplicate
         if not self._query_token_list:
             raise ValueError("A query must be non-empty")
         if not conjunctive:
-            raise NotImplementedError("Disjunctive query not yet supported")
+            raise NotImplementedError("Non-conjunctive query not yet supported")
         self._conjunctive = conjunctive
         self._filename = filename
 
     @staticmethod
     def _score_function(score_1, score_2):
+        """
+        Computes the combination of two scores
+        :param score_1: a score
+        :param score_2: another score
+        :return: Combined scores = score1 + score2
+        """
         return score_1 + score_2
 
 
