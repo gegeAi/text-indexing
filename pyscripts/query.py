@@ -39,14 +39,29 @@ class Query:
 
 
 class NaiveQuery(Query):
+    """
+    This class represents a query that will be executed with the naive algorithm.
+    It has the same initialization and attributes than Query.
+    """
     def __init__(self, query, tokenizer=nltk, filename="inverted_file.if", conjunctive=True):
         super().__init__(query, tokenizer, filename, conjunctive)
 
-    def execute(self, inverted_file, top_k=5):
-        # TODO: return a wrong result for the query "house divorce" on the document la123189
+    def execute(self, top_k=5):
+        """
+        Execute the query represented by this instance, and return the result as a list of tuples.
+        Each tuple has the document's id, then the score associated to this document.
+        :param top_k: The maximum number of document that will be returned.
+        :return: A list of length max(top_k, len(valid_document)), where valid_document is the collections of document
+                that contains all documents matching all query terms.
+                The result is a list of tuples, the first tuple's element is the document id, the second is the score
+                of the document. The list is sorted according to the score of the documents.
+                The documents in the list are the documents with the highest score according to the considered
+                query in all the corpus.
+        """
         if not self._query_token_list:
             return []
 
+        inverted_file = InvertedFile(None)
         inverted_file.read_posting_lists(self._query_token_list, self._filename)
         result = inverted_file.map[self._query_token_list[0]]
         for token in self._query_token_list[1:]:
@@ -56,6 +71,16 @@ class NaiveQuery(Query):
 
     @classmethod
     def __merge_posting_list(cls, list1, list2):
+        """
+        Given two posting lists, each one being a list of tuples, with the document's id as the first element, and the
+        score as the second element, returned the merged posting list.
+        :param list1: A list of tuple, with the document's id as the first element, and the score as the second element.
+                The list must be sorted according to the document's id.
+        :param list2: Another posting list with the same structure.
+        :return: A posting list with the same structure. This list contains a document iff the document was present in
+                the two provided lists. The score of this document will be the score returned by the score function of
+                the class Query.
+        """
         result = []
 
         index_list1 = 0
@@ -80,11 +105,27 @@ class NaiveQuery(Query):
 
 
 class FaginQuery(Query):
+    """
+    This class represents a query that will be executed with the Fagin's threshold algorithm.
+    It has the same initialization and attributes than Query.
+    """
     def __init__(self, query, tokenizer=nltk, filename="inverted_file.if", conjunctive=True):
         super().__init__(query, tokenizer, filename, conjunctive)
 
-    def execute(self, inverted_file, top_k=5):
+    def execute(self, top_k=5):
+        """
+        Execute the query represented by this instance, and return the result as a list of tuples.
+        Each tuple has the document's id, then the score associated to this document.
+        :param top_k: The maximum number of document that will be returned.
+        :return: A list of length max(top_k, len(valid_document)), where valid_document is the collections of document
+                that contains all documents matching all query terms.
+                The result is a list of tuples, the first tuple's element is the document id, the second is the score
+                of the document. The list is sorted according to the score of the documents.
+                The documents in the list are the documents with the highest score according to the considered
+                query in all the corpus.
+        """
         # In this method, pl stands for "posting_list"
+        inverted_file = InvertedFile(None)
         inverted_file.read_posting_lists(self._query_token_list, self._filename)
 
         # The ith element of used_pl_sorted_by_score and used_pl_sorted_by_doc_id
@@ -147,6 +188,15 @@ class FaginQuery(Query):
 
     @staticmethod
     def __find_score_by_doc_id(posting_list, doc_id, default_value=-1000000):
+        """
+        Given a posting list and a document's id, returned the score associated with the document in the posting list.
+        If the document is not in the provided posting list, return default_value.
+        :param posting_list: The posting list that will be searched for the document.
+        :param doc_id: The id of the document from which the score will be retrieved.
+        :param default_value: The score returned if the document is not in the posting list. Default is -1000000.
+        :return: The score associated to the document whose id is doc_id. If no such document is in the posting list,
+                return the default value instead.
+        """
         min_index = 0
         max_index = len(posting_list)
         while min_index < max_index:
@@ -165,10 +215,16 @@ class FaginQuery(Query):
 
     @staticmethod
     def __sort_by_score(posting_list):
+        """
+        Given a posting list, return the same posting list, but sorted according to the score of the documents.
+        :param posting_list: A list of tuples, with the first element being the document's id, and the second the score.
+        :return: The posting list sorted according to the score. The docuement with the highest score is the first
+                element of the list.
+        """
         return sorted(posting_list, key=lambda x: x[1], reverse=True)
 
     @staticmethod
-    def __reverse_insert(list_, x, min_index=0, high_index=None):
+    def __reverse_insert(list_, x, low_index=0, high_index=None):
         """Insert item x in list list_, and keep it reverse-sorted assuming a
         is reverse-sorted. list_ is a list of tuple, reverse-sorted according
         to the second item of the tuple
@@ -180,17 +236,17 @@ class FaginQuery(Query):
 
         /!\ Adapted to use second element of tuple x as key /!\
         """
-        if min_index < 0:
+        if low_index < 0:
             raise ValueError('min_index must be non-negative')
         if high_index is None:
             high_index = len(list_)
-        while min_index < high_index:
-            mid = (min_index + high_index) // 2
+        while low_index < high_index:
+            mid = (low_index + high_index) // 2
             if x[1] > list_[mid][1]:
                 high_index = mid
             else:
-                min_index = mid + 1
-        list_.insert(min_index, x)
+                low_index = mid + 1
+        list_.insert(low_index, x)
 
 
 if __name__ == "__main__":
