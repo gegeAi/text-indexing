@@ -125,10 +125,21 @@ class FaginQuery(Query):
 
     @staticmethod
     def __find_score_by_doc_id(posting_list, doc_id, default_value=-1000000):
-        for document, score in posting_list:
-            if doc_id == document:
-                return score
-        return default_value  # If a document is not in a posting list, return the default value
+        min_index = 0
+        max_index = len(posting_list)
+        while min_index < max_index:
+            mid = (min_index + max_index) // 2
+            if doc_id > posting_list[mid][0]:
+                min_index = mid + 1
+            elif doc_id < posting_list[mid][0]:
+                max_index = mid
+            else:
+                break
+
+        if doc_id == posting_list[mid][0]:
+            return posting_list[mid][1]
+        else:
+            return default_value
 
     @staticmethod
     def __sort_by_score(posting_list):
@@ -279,11 +290,11 @@ if __name__ == "__main__":
     top_k = 10
     inverted_file_length = 730
 
-    # query_length_benchmark_fagin(inverted_file, max_query, top_k)
-    # query_length_benchmark_naive(inverted_file, max_query, top_k)
-    # max_top_k = 30
-    # top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
-    # top_k_benchmark_naive(inverted_file, max_query, max_top_k)
+    query_length_benchmark_fagin(inverted_file, max_query, top_k)
+    query_length_benchmark_naive(inverted_file, max_query, top_k)
+    max_top_k = 30
+    top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
+    top_k_benchmark_naive(inverted_file, max_query, max_top_k)
     inverted_file_length_benchmark_fagin(inverted_file, max_query, top_k, inverted_file_length)
     inverted_file_length_benchmark_naive(inverted_file, max_query, top_k, inverted_file_length)
 
