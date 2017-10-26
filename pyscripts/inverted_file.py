@@ -280,7 +280,7 @@ if __name__ == "__main__":
 
     LATIMES_PATH = './latimes'
     files = glob.iglob(LATIMES_PATH + '/*')
-    xml_files = read_files(files)
+    xml_files = read_files(files, 10)
 
     number_of_files = len(xml_files)
     time_output_filename = "inverted_file/time.txt"

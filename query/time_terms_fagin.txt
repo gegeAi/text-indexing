@@ -1,0 +1,87 @@
+
+
+========== Run beginning at 1508502349.8126037===========
+
+
+========== Run beginning at 1508502400.7189274===========
+number_of_terms : 30 time : 40.93053674697876
+number_of_terms : 29 time : 40.82761573791504
+
+
+========== Run beginning at 1508502614.0883818===========
+
+
+========== Run beginning at 1508502734.863456===========
+
+
+========== Run beginning at 1508502815.755593===========
+number_of_terms : 30 time : 44.1536602973938
+
+
+========== Run beginning at 1508503146.588458===========
+
+
+========== Run beginning at 1509013225.5675647===========
+number_of_terms : 30 time : 8.672834873199463
+number_of_terms : 29 time : 5.534129858016968
+number_of_terms : 28 time : 5.476440191268921
+number_of_terms : 27 time : 5.402383804321289
+number_of_terms : 26 time : 5.291283845901489
+number_of_terms : 25 time : 5.395317077636719
+number_of_terms : 24 time : 5.091737747192383
+number_of_terms : 23 time : 5.200212001800537
+number_of_terms : 22 time : 4.809018611907959
+number_of_terms : 21 time : 4.726384878158569
+number_of_terms : 20 time : 4.635668992996216
+number_of_terms : 19 time : 4.289158344268799
+number_of_terms : 18 time : 4.53177547454834
+number_of_terms : 17 time : 4.009699583053589
+number_of_terms : 16 time : 4.5160322189331055
+number_of_terms : 15 time : 6.266322612762451
+number_of_terms : 14 time : 4.093987703323364
+number_of_terms : 13 time : 4.04067850112915
+number_of_terms : 12 time : 3.628647565841675
+number_of_terms : 11 time : 3.498033046722412
+number_of_terms : 10 time : 3.2893707752227783
+number_of_terms : 9 time : 2.956035852432251
+number_of_terms : 8 time : 2.573162078857422
+number_of_terms : 7 time : 2.4700918197631836
+number_of_terms : 6 time : 2.322187662124634
+number_of_terms : 5 time : 3.6473093032836914
+number_of_terms : 4 time : 2.4710769653320312
+number_of_terms : 3 time : 1.8863940238952637
+number_of_terms : 2 time : 1.5623838901519775
+number_of_terms : 1 time : 1.3363802433013916
+
+
+========== Run beginning at 1509013700.9802406===========
+number_of_terms : 30 time : 9.76649808883667
+number_of_terms : 29 time : 6.235050916671753
+number_of_terms : 28 time : 10.19718050956726
+number_of_terms : 27 time : 6.9893529415130615
+number_of_terms : 26 time : 7.110763072967529
+number_of_terms : 25 time : 9.090043067932129
+number_of_terms : 24 time : 6.835382699966431
+number_of_terms : 23 time : 6.189971208572388
+number_of_terms : 22 time : 6.311322450637817
+number_of_terms : 21 time : 6.614931106567383
+number_of_terms : 20 time : 5.154017686843872
+number_of_terms : 19 time : 7.928603887557983
+number_of_terms : 18 time : 5.815666437149048
+number_of_terms : 17 time : 6.363095283508301
+number_of_terms : 16 time : 6.481841087341309
+number_of_terms : 15 time : 5.0929858684539795
+number_of_terms : 14 time : 4.3565757274627686
+number_of_terms : 13 time : 3.4981048107147217
+number_of_terms : 12 time : 4.79130744934082
+number_of_terms : 11 time : 4.487562894821167
+number_of_terms : 10 time : 3.824180841445923
+number_of_terms : 9 time : 3.6771130561828613
+number_of_terms : 8 time : 3.4639015197753906
+number_of_terms : 7 time : 2.7763259410858154
+number_of_terms : 6 time : 2.29970645904541
+number_of_terms : 5 time : 3.191349744796753
+number_of_terms : 4 time : 2.7134382724761963
+number_of_terms : 3 time : 1.8681385517120361
+number_of_terms : 2 time : 1.6688847541809082
+number_of_terms : 1 time : 1.965050458908081
