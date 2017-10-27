@@ -1,10 +1,9 @@
 # First launch
-`git clone https://github.com/gegeAi/text-indexing.git`
-`cd text-indexing`
-`pip3 install -r requirements.txt`
-`jupyter notebook`
-Then open 'text index creating.ipynb' and execute the example.
-Make sure to have a folder with latimes files, and check the path to this folder in the notebooks (variable LATIMES_PATH).
+`git clone https://github.com/gegeAi/text-indexing.git`  
+`cd text-indexing`  
+`pip3 install -r requirements.txt`  
+`jupyter notebook`  
+Then open 'text index creating.ipynb' and execute the example. Make sure to have a folder with latimes files, and check the path to this folder in the notebooks (variable LATIMES_PATH).
 
 # Folder description
 ## Root
