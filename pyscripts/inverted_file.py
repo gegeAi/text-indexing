@@ -268,6 +268,12 @@ if __name__ == "__main__":
         return output
 
     def score(token, document):
+        """
+        Returns the score of a token in a document
+        :param token:
+        :param document:
+        :return:
+        """
         paragraph_tokens = document['text'].copy()
         paragraph_tokens.append(document['title'])
         token_count = 0

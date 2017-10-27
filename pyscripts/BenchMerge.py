@@ -40,6 +40,12 @@ def read_files(paths, n=-1):
 
 
 def score(token, document):
+    """
+    Returns the score of a token in a document
+    :param token:
+    :param document:
+    :return:
+    """
     paragraph_tokens = document['text'].copy()
     paragraph_tokens.append(document['title'])
     token_count = 0
