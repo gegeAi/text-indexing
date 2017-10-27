@@ -1,5 +1,7 @@
 import nltk
 
+from pyscripts.inverted_file import InvertedFile
+
 
 class Query:
     """
@@ -63,9 +65,17 @@ class NaiveQuery(Query):
 
         inverted_file = InvertedFile(None)
         inverted_file.read_posting_lists(self._query_token_list, self._filename)
-        result = inverted_file.map[self._query_token_list[0]]
+        try:
+            result = inverted_file.map[self._query_token_list[0]]
+        except KeyError:
+            return []  # At least one token does not exist in the inverted file, the query can not return anything.
+
         for token in self._query_token_list[1:]:
-            result = self.__merge_posting_list(result, inverted_file.map[token])
+            try:
+                current_token_posting_list = inverted_file.map[token]
+            except KeyError:
+                return []  # At least one token does not exist in the inverted file, the query can not return anything.
+            result = self.__merge_posting_list(result, current_token_posting_list)
 
         return sorted(result, key=lambda x: x[1], reverse=True)[:top_k]
 
@@ -133,7 +143,10 @@ class FaginQuery(Query):
         used_pl_sorted_by_score = []
         used_pl_sorted_by_doc_id = []
         for token in self._query_token_list:
-            used_pl_sorted_by_doc_id.append(inverted_file.map[token])
+            try:
+                used_pl_sorted_by_doc_id.append(inverted_file.map[token])
+            except KeyError:
+                return []  # At least one token does not exist in the inverted file, the query can not return anything.
             used_pl_sorted_by_score.append(self.__sort_by_score(used_pl_sorted_by_doc_id[-1]))
 
         tau = float("inf")
@@ -247,183 +260,3 @@ class FaginQuery(Query):
             else:
                 low_index = mid + 1
         list_.insert(low_index, x)
-
-
-if __name__ == "__main__":
-    from pyscripts.inverted_file import InvertedFile
-    from pyscripts.tokenizer import Tokenizer
-    import time
-
-
-    def query_length_benchmark_fagin(inverted_file: InvertedFile, max_query: str, top_k: int):
-        """
-        Benchmark a fagin query with a variable query length
-        :param inverted_file: the IF to be used
-        :param max_query: the maximum size of a query
-        :param top_k: the max number of results to look for
-        :return:
-        """
-        max_splitted = max_query.split()
-        number_of_terms = len(max_splitted)
-        time_output_filename = "query/time_terms_fagin.txt"
-        with open(time_output_filename, "a") as time_output_fagin:
-            time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
-            while number_of_terms > 0:
-                query = " ".join(max_splitted[:number_of_terms])
-                print("Begin to execute queries with {} terms".format(number_of_terms))
-                print(query)
-                start_time = time.time()
-                fagin_query = FaginQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
-                print(fagin_query.execute(inverted_file, top_k))
-                end_time = time.time()
-                time_output_fagin.write(
-                    "number_of_terms : " + str(number_of_terms) + " time : " + str(end_time - start_time) +
-                    "\n")
-                number_of_terms -= 1
-
-    def query_length_benchmark_naive(inverted_file: InvertedFile, max_query: str, top_k: int):
-        """
-        Benchmark a naive query with a variable query length
-        :param inverted_file: the IF to be used
-        :param max_query: the maximum size of a query
-        :param top_k: the max number of results to look for
-        :return:
-        """
-        max_splitted = max_query.split()
-        number_of_terms = len(max_splitted)
-        time_output_filename = "query/time_terms_naive.txt"
-        with open(time_output_filename, "a") as time_output_naive:
-            time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
-            while number_of_terms > 0:
-                query = " ".join(max_splitted[:number_of_terms])
-                print("Begin to execute queries with {} terms".format(number_of_terms))
-                print(query)
-                start_time = time.time()
-                naive_query = NaiveQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
-                print(naive_query.execute(inverted_file, top_k))
-                end_time = time.time()
-                time_output_naive.write(
-                    "number_of_terms : " + str(number_of_terms) + " time : " + str(end_time - start_time) +
-                    "\n")
-                number_of_terms -= 1
-
-    def top_k_benchmark_fagin(inverted_file: InvertedFile, query: str, max_top_k: int):
-        """
-        Benchmark a fagin query with a variable top_k
-        :param inverted_file: the IF to be used
-        :param query: the size of a query
-        :param max_top_k: the max number of results to look for
-        :return:
-        """
-        top_k = max_top_k
-        time_output_filename = "query/time_top_k_fagin.txt"
-        with open(time_output_filename, "a") as time_output_fagin:
-            time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
-            while top_k > 0:
-                print("Begin to execute queries with top_k = {}".format(top_k))
-                print(query)
-                start_time = time.time()
-                fagin_query = FaginQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
-                print(fagin_query.execute(inverted_file, top_k))
-                end_time = time.time()
-                time_output_fagin.write(
-                    "top_k : " + str(top_k) + " time : " + str(end_time - start_time) +
-                    "\n")
-                top_k -= 1
-
-    def top_k_benchmark_naive(inverted_file: InvertedFile, query: str, max_top_k: int):
-        """
-        Benchmark a naive query with a variable top_k
-        :param inverted_file: the IF to be used
-        :param query: the size of a query
-        :param max_top_k: the max number of results to look for
-        :return:
-        """
-        top_k = max_top_k
-        time_output_filename = "query/time_top_k_naive.txt"
-        with open(time_output_filename, "a") as time_output_naive:
-            time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
-            while top_k > 0:
-                print("Begin to execute queries with top_k = {}".format(top_k))
-                print(query)
-                start_time = time.time()
-                naive_query = NaiveQuery(query, Tokenizer(), "inverted_file/inverted_file_730.if")
-                print(naive_query.execute(inverted_file, top_k))
-                end_time = time.time()
-                time_output_naive.write(
-                    "top_k : " + str(top_k) + " time : " + str(end_time - start_time) +
-                    "\n")
-                top_k -= 1
-
-    def inverted_file_length_benchmark_fagin(inverted_file, query, top_k, inverted_file_length):
-        """
-        Benchmark a fagin query with a variable IF length
-        :param inverted_file: the IF to be used
-        :param query: the size of a query
-        :param top_k: the max number of results to look for
-        :param inverted_file_length: The size of the IF actually used by the query
-        :return:
-        """
-        time_output_filename = "query/time_inverted_file_length_fagin.txt"
-        with open(time_output_filename, "a") as time_output_fagin:
-            time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
-            while inverted_file_length > 0:
-                print("Begin to execute query with inverted file length = {}".format(inverted_file_length))
-                print(query)
-                start_time = time.time()
-                fagin_query = FaginQuery(query, Tokenizer(), "inverted_file/inverted_file_{}.if".
-                                         format(inverted_file_length))
-                print(fagin_query.execute(inverted_file, top_k))
-                end_time = time.time()
-                time_output_fagin.write(
-                    "inverted_file_length : " + str(inverted_file_length) + " time : " + str(end_time - start_time) +
-                    "\n")
-                inverted_file_length -= 50
-
-    def inverted_file_length_benchmark_naive(inverted_file, query, top_k, inverted_file_length):
-        """
-        Benchmark a naive query with a variable IF length
-        :param inverted_file: the IF to be used
-        :param query: the size of a query
-        :param top_k: the max number of results to look for
-        :param inverted_file_length: The size of the IF actually used by the query
-        :return:
-        """
-        time_output_filename = "query/time_inverted_file_length_naive.txt"
-        with open(time_output_filename, "a") as time_output_naive:
-            time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
-            while inverted_file_length > 0:
-                print("Begin to execute query with inverted file length = {}".format(inverted_file_length))
-                print(query)
-                start_time = time.time()
-                naive_query = NaiveQuery(query, Tokenizer(), "inverted_file/inverted_file_{}.if".
-                                         format(inverted_file_length))
-                print(naive_query.execute(inverted_file, top_k))
-                end_time = time.time()
-                time_output_naive.write(
-                    "inverted_file_length : " + str(inverted_file_length) + " time : " + str(end_time - start_time) +
-                    "\n")
-                inverted_file_length -= 50
-
-
-    max_query = "the be to of and a in that have I it for not on with he as you do at this but his by from they we " \
-                "say her she"
-    inverted_file = InvertedFile(None)
-    top_k = 10
-    inverted_file_length = 730
-
-    query_length_benchmark_fagin(inverted_file, max_query, top_k)
-    query_length_benchmark_naive(inverted_file, max_query, top_k)
-    max_top_k = 30
-    top_k_benchmark_fagin(inverted_file, max_query, max_top_k)
-    top_k_benchmark_naive(inverted_file, max_query, max_top_k)
-    inverted_file_length_benchmark_fagin(inverted_file, max_query, top_k, inverted_file_length)
-    inverted_file_length_benchmark_naive(inverted_file, max_query, top_k, inverted_file_length)
-
-    # print("Create and execute fagin query")
-    # query = FaginQuery("The horse in the field", Tokenizer())
-    # print(query.execute(inverted_file, top_k))
-    #
-    # print("Create and execute naive query")
-    # naive_query = NaiveQuery("The horse in the field", Tokenizer())
-    # print(naive_query.execute(inverted_file, top_k))
