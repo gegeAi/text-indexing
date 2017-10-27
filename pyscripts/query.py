@@ -256,6 +256,13 @@ if __name__ == "__main__":
 
 
     def query_length_benchmark_fagin(inverted_file: InvertedFile, max_query: str, top_k: int):
+        """
+        Benchmark a fagin query with a variable query length
+        :param inverted_file: the IF to be used
+        :param max_query: the maximum size of a query
+        :param top_k: the max number of results to look for
+        :return:
+        """
         max_splitted = max_query.split()
         number_of_terms = len(max_splitted)
         time_output_filename = "query/time_terms_fagin.txt"
@@ -275,6 +282,13 @@ if __name__ == "__main__":
                 number_of_terms -= 1
 
     def query_length_benchmark_naive(inverted_file: InvertedFile, max_query: str, top_k: int):
+        """
+        Benchmark a naive query with a variable query length
+        :param inverted_file: the IF to be used
+        :param max_query: the maximum size of a query
+        :param top_k: the max number of results to look for
+        :return:
+        """
         max_splitted = max_query.split()
         number_of_terms = len(max_splitted)
         time_output_filename = "query/time_terms_naive.txt"
@@ -294,6 +308,13 @@ if __name__ == "__main__":
                 number_of_terms -= 1
 
     def top_k_benchmark_fagin(inverted_file: InvertedFile, query: str, max_top_k: int):
+        """
+        Benchmark a fagin query with a variable top_k
+        :param inverted_file: the IF to be used
+        :param query: the size of a query
+        :param max_top_k: the max number of results to look for
+        :return:
+        """
         top_k = max_top_k
         time_output_filename = "query/time_top_k_fagin.txt"
         with open(time_output_filename, "a") as time_output_fagin:
@@ -311,6 +332,13 @@ if __name__ == "__main__":
                 top_k -= 1
 
     def top_k_benchmark_naive(inverted_file: InvertedFile, query: str, max_top_k: int):
+        """
+        Benchmark a naive query with a variable top_k
+        :param inverted_file: the IF to be used
+        :param query: the size of a query
+        :param max_top_k: the max number of results to look for
+        :return:
+        """
         top_k = max_top_k
         time_output_filename = "query/time_top_k_naive.txt"
         with open(time_output_filename, "a") as time_output_naive:
@@ -328,6 +356,14 @@ if __name__ == "__main__":
                 top_k -= 1
 
     def inverted_file_length_benchmark_fagin(inverted_file, query, top_k, inverted_file_length):
+        """
+        Benchmark a fagin query with a variable IF length
+        :param inverted_file: the IF to be used
+        :param query: the size of a query
+        :param top_k: the max number of results to look for
+        :param inverted_file_length: The size of the IF actually used by the query
+        :return:
+        """
         time_output_filename = "query/time_inverted_file_length_fagin.txt"
         with open(time_output_filename, "a") as time_output_fagin:
             time_output_fagin.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
@@ -345,6 +381,14 @@ if __name__ == "__main__":
                 inverted_file_length -= 50
 
     def inverted_file_length_benchmark_naive(inverted_file, query, top_k, inverted_file_length):
+        """
+        Benchmark a naive query with a variable IF length
+        :param inverted_file: the IF to be used
+        :param query: the size of a query
+        :param top_k: the max number of results to look for
+        :param inverted_file_length: The size of the IF actually used by the query
+        :return:
+        """
         time_output_filename = "query/time_inverted_file_length_naive.txt"
         with open(time_output_filename, "a") as time_output_naive:
             time_output_naive.write("\n\n========== Run beginning at " + str(time.time()) + "===========\n")
